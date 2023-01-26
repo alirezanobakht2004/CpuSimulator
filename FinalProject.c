@@ -157,31 +157,26 @@ void overflow(int x, int y, int z)
 }
 void MULL(int x,int y)
 {
-   char z;
-   z=s[x]*s[y];
+   int z=s[x]*s[y];
    int u=z;
    s[y]=u>>4;
-   z<<4;
-//    int b=0;
-//    s[x] = 0;
-//    for(int i=0;i<4;i++)
-//    {
-//     b=z%2;
-//     if (b == 1)
-//     {
-//         s[x]+=2^i;
-//     }
-//    }
+   char c=z+'0';
+   s[x]=c<<4;
    printf("%d %d %d",s[x],s[y],z);
-  // s[y]=z>>(sizeof(z)-4);
 }
 int main()
 {
     int x, y, z, byte_line[1000], khat = 0;
 
     char buffer[1000], cmp[1000], cmp_reset[1000];
+    
+    char file_name[100];
+    
+    printf("ENTER YOUR TXT FILE NAME:");
+    scanf("%s",file_name);
 
-    FILE *fptr = fopen("in.txt", "r");
+    FILE *fptr = fopen(file_name, "r");
+
     while (fscanf(fptr, "%[^\n]\n", buffer) != EOF)
     {
         byte_line[khat] = ftell(fptr);
@@ -264,6 +259,7 @@ int main()
             else
             {
                 sscanf(buffer, "MOV S%d, %d", &x, &z);
+                printf("***********%d**********",z);
                 s[x] = z;
             }
         }

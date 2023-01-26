@@ -1,0 +1,5 @@
+MOV S0, 2
+MoV S1, 5
+dump_regs
+Mull s1,s2
+exit
