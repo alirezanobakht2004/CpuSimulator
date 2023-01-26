@@ -188,9 +188,17 @@ void POP(int x)
         top-=1;
     }
 }
+void DIV(int x,int y)
+{
+    int q,r;
+    q=s[x]/s[y];
+    r=s[x]%s[y];
+    s[x]=q;
+    s[y]=r;
+}
 int main()
 {
-    int x, y, z, byte_line[1000], khat = 0;
+    int x, y, z, byte_line[1000], khat = 0,SKIE=0;
 
     char buffer[1000], cmp[1000], cmp_reset[1000];
     
@@ -217,10 +225,12 @@ int main()
         {
             cmp[i] = buffer[i];
         }
-        // if (buffer[0]=='/')
-        // {
-        //     continue;
-        // }
+        if(SKIE!=0)
+        {
+            buffer[0]='/';
+            buffer[1]='/';
+            SKIE=0;
+        }
         if (strcmp(cmp, "ADD") == 0)
         {
             sscanf(buffer, "ADD S%d, S%d, S%d", &x, &y, &z);
@@ -291,6 +301,18 @@ int main()
             sscanf(buffer, "SWP S%d, S%d", &x, &y);
             SWP(x, y);
         }
+        else if (strcmp(cmp, "DIV") == 0)
+        {
+            sscanf(buffer, "DIV S%d, S%d", &x, &y);
+            if(x>31 && y>31)
+            {
+                printf("ERROR!");
+            }
+            
+            else {
+                DIV(x, y);
+            }
+        }
         else if (strcmp(cmp, "DUMP_REGS") == 0)
         {
             DUMP_REGS();
@@ -326,6 +348,14 @@ int main()
         {
             sscanf(buffer, "POP S%d", &x);
             POP(x);
+        }
+        else if (strcmp(cmp, "SKIE") == 0)
+        {
+            sscanf(buffer, "SKIE S%d, S%d", &x, &y);
+            if(s[x]==s[y])
+            {
+                SKIE++;
+            }
         }
         else if (strcmp(cmp, "EXIT") == 0)
         {

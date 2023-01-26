@@ -1,16 +1,11 @@
-MOV S0, 1
-MoV S1, 37
-//fdf
+MOV S0, 3
+MoV S1, 7
 mov s2, 3
+skie s0, s2
 mov s3, 6
-//vfmfpkfd
+mov s4, 7
+skie s4, S1
+mov s5, 6
+mov s6, 8
 dump_regs
-push s2
-/n
-push S0
-kk
-pop s3
-dump_regs
-/sdv
-lp
 exit
