@@ -1,5 +1,16 @@
-MOV S0, 2
-MoV S1, 5
+MOV S0, 1
+MoV S1, 37
+//fdf
+mov s2, 3
+mov s3, 6
+//vfmfpkfd
 dump_regs
-Mull s1,s2
+push s2
+/n
+push S0
+kk
+pop s3
+dump_regs
+/sdv
+lp
 exit

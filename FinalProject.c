@@ -3,6 +3,7 @@
 #include <ctype.h>
 int s[32];
 int s_v[8];
+int stack[32],top=-1;
 void ADD(int x, int y, int z)
 {
     s[x] = s[y] + s[z];
@@ -158,11 +159,34 @@ void overflow(int x, int y, int z)
 void MULL(int x,int y)
 {
    int z=s[x]*s[y];
-   int u=z;
-   s[y]=u>>4;
-   char c=z+'0';
-   s[x]=c<<4;
+   int e=z;
+   int i=0;
+   char o[32];
+   while (e!=0)
+   {o[i]=e%2;
+    e=e/2;
+    i++;}
+   s[y]=z&15;
+   s[x]=z>>4;
    printf("%d %d %d",s[x],s[y],z);
+}
+void PUSH(int x)
+{
+    if(top == 31)
+        printf("\nERROR:can't add more elements into the stack\n");
+    else{
+        top+=1;
+        stack[top] = s[x];
+    }
+}
+void POP(int x)
+{
+    if(top == -1)
+        printf("\nERROR:can't remove any element\n");
+    else{
+        s[x] = stack[top];
+        top-=1;
+    }
 }
 int main()
 {
@@ -193,10 +217,10 @@ int main()
         {
             cmp[i] = buffer[i];
         }
-        if (buffer[0]=='/')
-        {
-            continue;
-        }
+        // if (buffer[0]=='/')
+        // {
+        //     continue;
+        // }
         if (strcmp(cmp, "ADD") == 0)
         {
             sscanf(buffer, "ADD S%d, S%d, S%d", &x, &y, &z);
@@ -259,7 +283,6 @@ int main()
             else
             {
                 sscanf(buffer, "MOV S%d, %d", &x, &z);
-                printf("***********%d**********",z);
                 s[x] = z;
             }
         }
@@ -294,9 +317,39 @@ int main()
             sscanf(buffer, "MULL S%d, S%d", &x, &y);
             MULL(x, y);
         }
+        else if (strcmp(cmp, "PUSH") == 0)
+        {
+            sscanf(buffer, "PUSH S%d", &x);
+            PUSH(x);
+        }
+        else if (strcmp(cmp, "POP") == 0)
+        {
+            sscanf(buffer, "POP S%d", &x);
+            POP(x);
+        }
         else if (strcmp(cmp, "EXIT") == 0)
         {
             break;
+        }
+        else if (buffer[0]=='/')
+        {
+            if(buffer[1]=='/')
+            {
+               for(int m=0;m<100;m++)
+               {
+                buffer[m]=' ';
+               }
+            }
+            else
+            {
+            for (int m = 0; m < 100; m++)
+            {
+                if (byte_line[m+1] == ftell(fptr))
+                {
+                    printf("\nERROR! WRONG COMMAND IN LINE %d\n", m+2);
+                }
+            }
+            }
         }
         else
         {
