@@ -3,46 +3,134 @@
 #include <ctype.h>
 int s[32];
 int s_v[8];
-int stack[32],top=-1;
+int stack[32],top=-1,correct=0;
+void parity(int x)
+{
+    int count = 0;
+    while (x > 0)
+    {
+        count = count + 1;
+        x = x & (x - 1);
+    }
+    if (count % 2 == 0)
+    {
+        s_v[0] = 0;
+    }
+    else
+    {
+        s_v[0] = 1;
+    }
+}
+void zero(int x)
+{
+    if (x == 0)
+    {
+        s_v[1] = 1;
+    }
+    else
+    {
+        s_v[1] = 0;
+    }
+}
+void sign(int x)
+{
+    if (x < 0)
+    {
+        s_v[2] = 1;
+    }
+    else
+    {
+        s_v[2] = 0;
+    }
+}
+void overflow(int x, int y, int z)
+{
+    if (y > 0 && z > 0 && x < 0)
+    {
+        s_v[5] = 1;
+    }
+    else if (y < 0 && z < 0 && x > 0)
+    {
+        s_v[5] = 1;
+    }
+    else
+    {
+        s_v[5] = 0;
+    }
+}
 void ADD(int x, int y, int z)
 {
     s[x] = s[y] + s[z];
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
+    overflow(s[x], s[y], s[z]);
 }
 void SUB(int x, int y, int z)
 {
     s[x] = s[y] - s[z];
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
+    overflow(s[x], s[y], s[z]);
 }
 void AND(int x, int y, int z)
 {
     s[x] = s[y] & s[z];
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
 }
 void XOR(int x, int y, int z)
 {
     s[x] = s[y] ^ s[z];
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
 }
 void OR(int x, int y, int z)
 {
     s[x] = s[y] | s[z];
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
 }
 void ADDI(int x, int y, int z)
 {
     s[x] = s[y] + z;
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
+    overflow(s[x], s[y], s[z]);
 }
 void SUBI(int x, int y, int z)
 {
     s[x] = s[y] - z;
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
+    overflow(s[x], s[y], s[z]);
 }
 void ANDI(int x, int y, int z)
 {
     s[x] = s[y] & z;
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
 }
 void XORI(int x, int y, int z)
 {
     s[x] = s[y] ^ z;
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
 }
 void ORI(int x, int y, int z)
 {
     s[x] = s[y] | z;
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
 }
 void SWP(int x, int y)
 {
@@ -102,60 +190,6 @@ void OUTPUT()
 {
     printf("\nS0==%d", s[0]);
 }
-void parity(int x)
-{
-    int count = 0;
-    while (x > 0)
-    {
-        count = count + 1;
-        x = x & (x - 1);
-    }
-    if (count % 2 == 0)
-    {
-        s_v[0] = 0;
-    }
-    else
-    {
-        s_v[0] = 1;
-    }
-}
-void zero(int x)
-{
-    if (x == 0)
-    {
-        s_v[1] = 1;
-    }
-    else
-    {
-        s_v[1] = 0;
-    }
-}
-void sign(int x)
-{
-    if (x < 0)
-    {
-        s_v[2] = 1;
-    }
-    else
-    {
-        s_v[2] = 0;
-    }
-}
-void overflow(int x, int y, int z)
-{
-    if (y > 0 && z > 0 && x < 0)
-    {
-        s_v[5] = 1;
-    }
-    else if (y < 0 && z < 0 && x > 0)
-    {
-        s_v[5] = 1;
-    }
-    else
-    {
-        s_v[5] = 0;
-    }
-}
 void MULL(int x,int y)
 {
    int z=s[x]*s[y];
@@ -168,7 +202,10 @@ void MULL(int x,int y)
     i++;}
    s[y]=z&15;
    s[x]=z>>4;
-   printf("%d %d %d",s[x],s[y],z);
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
+    overflow(s[x], s[y], s[z]);
 }
 void PUSH(int x)
 {
@@ -195,10 +232,50 @@ void DIV(int x,int y)
     r=s[x]%s[y];
     s[x]=q;
     s[y]=r;
+    parity(s[x]);
+    zero(s[x]);
+    sign(s[x]);
+}
+void check_buffer(char *buffer,char *cmp,int x,int y,int z)
+{
+    if(strcmp(cmp, "ADD") == 0 || strcmp(cmp, "SUB") == 0 || strcmp(cmp, "AND") == 0 || strcmp(cmp, "XOR") == 0 || strcmp(cmp, "OR") == 0)
+    {
+        if(x==-1 || y==-1 || z==-1)
+        {
+            printf("\nERROR! WRONG ARGOMANS\n");
+        }
+        else if(strlen(buffer)>17)
+        {
+            printf("\nERROR! TOO MANY CHARACTERS\n");
+        }
+        else if(x>32 || y>32 || z>32)
+        {
+            printf("\nERROR! MORE THAN REGISTER CAPACITY\n");
+        }
+        else
+        {
+            correct++;
+        }
+    }
+    if(strcmp(cmp, "ADDI") == 0 || strcmp(cmp, "SUBI") == 0 || strcmp(cmp, "ANDI") == 0 || strcmp(cmp, "XORI") == 0 || strcmp(cmp, "ORI") == 0)
+    {
+     if(x==-1 || y==-1)
+        {
+            printf("\nERROR! WRONG ARGOMANS\n");
+        }
+        else if(x>32 || y>32)
+        {
+            printf("\nERROR! MORE THAN REGISTER CAPACITY\n");
+        }
+        else
+        {
+            correct++;
+        }
+    }
 }
 int main()
 {
-    int x, y, z, byte_line[1000], khat = 0,SKIE=0;
+    int x=-1, y=-1, z=-1, byte_line[1000], khat = 0,SKIE=0;
 
     char buffer[1000], cmp[1000], cmp_reset[1000];
     
@@ -234,52 +311,102 @@ int main()
         if (strcmp(cmp, "ADD") == 0)
         {
             sscanf(buffer, "ADD S%d, S%d, S%d", &x, &y, &z);
-            ADD(x, y, z);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                ADD(x, y, z);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "SUB") == 0)
         {
             sscanf(buffer, "SUB S%d, S%d, S%d", &x, &y, &z);
-            SUB(x, y, z);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                SUB(x, y, z);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "AND") == 0)
         {
             sscanf(buffer, "AND S%d, S%d, S%d", &x, &y, &z);
-            AND(x, y, z);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                AND(x, y, z);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "XOR") == 0)
         {
             sscanf(buffer, "XOR S%d, S%d, S%d", &x, &y, &z);
-            XOR(x, y, z);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                XOR(x, y, z);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "OR") == 0)
         {
             sscanf(buffer, "OR S%d, S%d, S%d", &x, &y, &z);
-            OR(x, y, z);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                OR(x, y, z);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "ADDI") == 0)
         {
             sscanf(buffer, "ADDI S%d, S%d, %d", &x, &y, &z);
-            ADDI(x, y, z);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                ADDI(x, y, z);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "SUBI") == 0)
         {
             sscanf(buffer, "SUBI S%d, S%d, %d", &x, &y, &z);
-            SUBI(x, y, z);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                SUBI(x, y, z);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "ANDI") == 0)
         {
             sscanf(buffer, "ANDI S%d, S%d, %d", &x, &y, &z);
-            ANDI(x, y, z);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                ANDI(x, y, z);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "XORI") == 0)
         {
             sscanf(buffer, "XORI S%d, S%d, %d", &x, &y, &z);
-            XORI(x, y, z);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                XORI(x, y, z);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "ORI") == 0)
         {
             sscanf(buffer, "ORI S%d, S%d, %d", &x, &y, &z);
-            ORI(x, y, z);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                ORI(x, y, z);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "MOV") == 0)
         {
@@ -288,12 +415,38 @@ int main()
             if (t == 'S')
             {
                 sscanf(buffer, "MOV S%d, S%d", &x, &y);
-                s[x] = s[y];
+                 if(x==-1 || y==-1)
+                 {
+                     printf("\nERROR! WRONG ARGOMANS\n");
+                 }
+                 else if(strlen(buffer)>13)
+                 {
+                   printf("\nERROR! TOO MANY CHARACTERS\n");
+                 }
+                  else if(x>32 || y>32)
+                 {
+                     printf("\nERROR! MORE THAN REGISTER CAPACITY\n");
+                 }
+                 else
+                 {
+                   s[x] = s[y];
+                 }
             }
             else
             {
                 sscanf(buffer, "MOV S%d, %d", &x, &z);
-                s[x] = z;
+                 if(x==-1)
+                 {
+                     printf("\nERROR! WRONG ARGOMANS\n");
+                 }
+                 else if(x>32)
+                 {
+                     printf("\nERROR! MORE THAN REGISTER CAPACITY\n");
+                 }
+                 else
+                 {
+                   s[x] = z;
+                 }
             }
         }
         else if (strcmp(cmp, "SWP") == 0)
@@ -395,9 +548,5 @@ int main()
         {
             cmp[i] = '\0';
         }
-        parity(s[x]);
-        zero(s[x]);
-        sign(s[x]);
-        overflow(s[x], s[y], s[z]);
     }
 }

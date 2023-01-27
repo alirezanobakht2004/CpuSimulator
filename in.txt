@@ -1,11 +1,5 @@
-MOV S0, 3
-MoV S1, 7
-mov s2, 3
-skie s0, s2
-mov s3, 6
-mov s4, 7
-skie s4, S1
-mov s5, 6
-mov s6, 8
+MOV S22, 5
+MOV S11, s22
+MOV S16, 2
 dump_regs
 exit
