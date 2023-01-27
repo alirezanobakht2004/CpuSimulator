@@ -1,5 +1,13 @@
-mov s0, 1
-mov s1, 666
-mull s0, s1
+mov s0, 12
+mov s1, 16
+subi s2, s1, 5
+input
+output
+push S1
+push s0
+pop S3
+mov s5, 1
+addi s6, s5, 36
+mull s5, s6//fdgfd
 dump_regs
 exit
