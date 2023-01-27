@@ -140,6 +140,7 @@ void SWP(int x, int y)
 }
 void DUMP_REGS()
 {
+    printf("\n");
     for (int i = 0; i < 32; i++)
     {
         if (i == 0)
@@ -195,13 +196,11 @@ void MULL(int x,int y)
    int z=s[x]*s[y];
    int e=z;
    int i=0;
-   char o[32];
    while (e!=0)
-   {o[i]=e%2;
-    e=e/2;
+   {e=e/2;
     i++;}
-   s[y]=z&15;
-   s[x]=z>>4;
+    s[y]=z&15;
+    s[x]=z>>(i-4);
     parity(s[x]);
     zero(s[x]);
     sign(s[x]);
@@ -244,10 +243,6 @@ void check_buffer(char *buffer,char *cmp,int x,int y,int z)
         {
             printf("\nERROR! WRONG ARGOMANS\n");
         }
-        else if(strlen(buffer)>17)
-        {
-            printf("\nERROR! TOO MANY CHARACTERS\n");
-        }
         else if(x>32 || y>32 || z>32)
         {
             printf("\nERROR! MORE THAN REGISTER CAPACITY\n");
@@ -257,9 +252,11 @@ void check_buffer(char *buffer,char *cmp,int x,int y,int z)
             correct++;
         }
     }
-    if(strcmp(cmp, "ADDI") == 0 || strcmp(cmp, "SUBI") == 0 || strcmp(cmp, "ANDI") == 0 || strcmp(cmp, "XORI") == 0 || strcmp(cmp, "ORI") == 0)
-    {
-     if(x==-1 || y==-1)
+    else if(strcmp(cmp, "ADDI") == 0 || strcmp(cmp, "SUBI") == 0 || strcmp(cmp, "ANDI") == 0 || 
+            strcmp(cmp, "XORI") == 0 || strcmp(cmp, "ORI") == 0 || strcmp(cmp, "SWP") == 0 || 
+            strcmp(cmp, "DIV") == 0 || strcmp(cmp, "MULL") == 0 || strcmp(cmp, "SKIE") == 0)
+        {
+        if(x==-1 || y==-1)
         {
             printf("\nERROR! WRONG ARGOMANS\n");
         }
@@ -285,7 +282,11 @@ int main()
     scanf("%s",file_name);
 
     FILE *fptr = fopen(file_name, "r");
-
+    if(fptr==NULL)
+    {
+        printf("FILE NAME IS INCORRECT!");
+        return 0;
+    }
     while (fscanf(fptr, "%[^\n]\n", buffer) != EOF)
     {
         byte_line[khat] = ftell(fptr);
@@ -297,6 +298,22 @@ int main()
         for (int k = 0; k < 100; k++)
         {
             buffer[k] = toupper(buffer[k]);
+        }
+        if (buffer[0] == 'I' && buffer[4] == 'T')
+        {
+            buffer[5] = ' ';
+        }
+        else if (buffer[0] == 'O' && buffer[5] == 'T')
+        {
+            buffer[6] = ' ';
+        }
+        else if (buffer[0] == 'D' && buffer[8] == 'S')
+        {
+            buffer[9] = ' ';
+        }
+        else if (buffer[0] == 'D' && buffer[10] == 'F')
+        {
+            buffer[11] = ' ';
         }
         for (int i = 0; buffer[i] != ' '; i++)
         {
@@ -419,10 +436,6 @@ int main()
                  {
                      printf("\nERROR! WRONG ARGOMANS\n");
                  }
-                 else if(strlen(buffer)>13)
-                 {
-                   printf("\nERROR! TOO MANY CHARACTERS\n");
-                 }
                   else if(x>32 || y>32)
                  {
                      printf("\nERROR! MORE THAN REGISTER CAPACITY\n");
@@ -452,18 +465,21 @@ int main()
         else if (strcmp(cmp, "SWP") == 0)
         {
             sscanf(buffer, "SWP S%d, S%d", &x, &y);
-            SWP(x, y);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                SWP(x, y);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "DIV") == 0)
         {
-            sscanf(buffer, "DIV S%d, S%d", &x, &y);
-            if(x>31 && y>31)
+            sscanf(buffer, "DIV S%d, S%d", &x, &y); 
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
             {
-                printf("ERROR!");
-            }
-            
-            else {
                 DIV(x, y);
+                correct=0;
             }
         }
         else if (strcmp(cmp, "DUMP_REGS") == 0)
@@ -485,29 +501,59 @@ int main()
         else if (strcmp(cmp, "JMP") == 0)
         {
             sscanf(buffer, "JMP %d", &x);
+            if(x>khat)
+            {
+                printf("\nERROR! MORE THAN FILE LINES\n");
+            }
+            else{
             fseek(fptr, byte_line[x - 2], SEEK_SET);
+            }
         }
         else if (strcmp(cmp, "MULL") == 0)
         {
             sscanf(buffer, "MULL S%d, S%d", &x, &y);
-            MULL(x, y);
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
+            {
+                MULL(x, y);
+                correct=0;
+            }
         }
         else if (strcmp(cmp, "PUSH") == 0)
         {
             sscanf(buffer, "PUSH S%d", &x);
+            if(x>31 || x==-1)
+            {
+                printf("\nERROR!\n");
+            }
+            else 
+            {
             PUSH(x);
+            }
         }
         else if (strcmp(cmp, "POP") == 0)
         {
             sscanf(buffer, "POP S%d", &x);
+            if(x>31 || x==-1)
+            {
+                printf("\nERROR!\n");
+            }
+            else 
+            {
             POP(x);
+            }
         }
         else if (strcmp(cmp, "SKIE") == 0)
         {
             sscanf(buffer, "SKIE S%d, S%d", &x, &y);
-            if(s[x]==s[y])
+            check_buffer(buffer,cmp,x,y,z);
+            if(correct==1)
             {
+                if(s[x]==s[y])
+                {
                 SKIE++;
+                }
+                correct=0;
             }
         }
         else if (strcmp(cmp, "EXIT") == 0)

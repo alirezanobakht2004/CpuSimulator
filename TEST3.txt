@@ -1,0 +1,5 @@
+mov s0, 1
+mov s1, 666
+mull s0, s1
+dump_regs
+exit

@@ -1,5 +1,0 @@
-MOV S22, 5
-MOV S11, s22
-MOV S16, 2
-dump_regs
-exit

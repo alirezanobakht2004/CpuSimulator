@@ -1,0 +1,35 @@
+mov s0, 69
+Mov s1, 58
+add s2, s1, s0
+sub s3, s2, s0//rfdgfg
+AND S4, S1, S2
+dump_regs
+xor s5, s1, s0
+or s6, s5, s3
+addi s7, s0, -6
+jmp 13//huhu
+subi s8, s2, 6
+ANDi S9, S1, 5
+dump_regs
+xor s10, s1, 4//sgfbfdx
+or s11, s5, 25
+SWP s11, s2
+mov s12, s6
+jmp 21
+mov s0,-9
+dump_regs 
+mov s13, 1
+mov s14, 37//dhgjnf
+mull s13, s14
+div s8, s7
+dump_regs
+mov s3, 5
+//fgfdzz
+mov s4, 5
+skie s3, s4
+mov s4, -98
+dump_regs
+push s4
+pop s0
+dump_regs
+exit
